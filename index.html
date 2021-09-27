@@ -27,36 +27,105 @@
         </table>
     
     </div>
+    <div ><h1>Correlantio of Events</h1>
+        <table class="table">
+            <thead>
+              <tr>
+                <th scope="col">#</th>
+                <th scope="col">Event</th>
+                <th scope="col">Correlation</th>
+              </tr>
+            </thead>
+            <tbody id='CorrelationTable'>
+             
+            </tbody>
+        </table>
+    
+    </div>
     <script>
-        fetch("https://gist.githubusercontent.com/josejbocanegra/b1873c6b7e732144355bb1627b6895ed/raw/d91df4c8093c23c41dce6292d5c1ffce0f01a68b/newDatalog.json")
-        .then(response => response.json())
-            .then(info =>{
-            console.log(info)
-            makingtable(info)
-        })
-        
-        function makingtable(data){
-            var table = document.getElementById('Table')
-            console.log(data.length)
-            data.forEach((element, index)=> {
-                let tr = document.createElement('tr')
-                let td1 = document.createElement('td')
-                let td2 = document.createElement('td')
-                let td3 = document.createElement('td')
-               td1.textContent=index
-               element.events.forEach(event =>
-                {
-                    td2.textContent+= event+" "
-                }
-               );
-               td3.textContent = element.squirrel
-               if (element.squirrel ==true)
-                    tr.style.backgroundColor = '#FFA6A6'
-               tr.appendChild(td1)
-               tr.appendChild(td2)
-               tr.appendChild(td3)
-               table.appendChild(tr)
-            });
-         }
+
+fetch("https://gist.githubusercontent.com/josejbocanegra/b1873c6b7e732144355bb1627b6895ed/raw/d91df4c8093c23c41dce6292d5c1ffce0f01a68b/newDatalog.json")
+.then(response => response.json())
+    .then(info =>{
+    console.log(info)
+    makingtable(info)
+    makingcorrelation(info)
+})
+
+function makingtable(data){
+    var table = document.getElementById('Table')
+    data.forEach((element, index)=> {
+        let tr = document.createElement('tr')
+        let td1 = document.createElement('th')
+        let td2 = document.createElement('td')
+        let td3 = document.createElement('td')
+       td1.textContent=index
+       element.events.forEach(event =>
+        {
+            td2.textContent+= event+" "
+        }
+       );
+       td3.textContent = element.squirrel
+       if (element.squirrel ==true)
+            tr.style.backgroundColor = '#ffc4cc'
+       tr.appendChild(td1)
+       tr.appendChild(td2)
+       tr.appendChild(td3)
+       table.appendChild(tr)
+    });
+ }
+
+
+ function makingcorrelation(data){
+    var table = document.getElementById('CorrelationTable')
+    var setofevents = new Set();
+    data.forEach((element, index)=> {
+        element.events.forEach(event =>
+        {
+            setofevents.add(event)
+        }
+       );
+    });
+    var TP = 0;
+    var TN = 0;
+    var FP = 0;
+    var FN = 0;
+    i=0
+    setofevents.forEach((elementlista) => {
+        data.forEach((element, index)=> {
+            
+        if ((element.events.includes(elementlista)) && element.squirrel == true ){
+            TP+= 1;
+        }
+        if(!(element.events.includes(elementlista)) && element.squirrel == true ){
+            FN+=1;
+        }
+        if(!(element.events.includes(elementlista)) && element.squirrel == false ){
+            TN+=1;
+        }
+        if((element.events.includes(elementlista)) && element.squirrel == false ){
+            FP+=1;
+        }
+    })
+    MCC_up= (TP*TN)-(FP*FN)
+    numero = (TP+FP)*(TP+FN)*(TN+FP)*(TN+FN)
+    MCC_down=Math.pow(numero, 1/2); 
+    MCC = MCC_up/MCC_down;
+    let tr = document.createElement('tr')
+    let td1 = document.createElement('th')
+    let td2 = document.createElement('td')
+    let td3 = document.createElement('td')
+    td1.textContent=i
+    i+=1
+    td2.textContent=elementlista
+    td3.textContent = MCC
+    tr.appendChild(td1)
+    tr.appendChild(td2)
+    tr.appendChild(td3)
+    table.appendChild(tr)
+    })
+ }
+
+
     </script>
 </html>
